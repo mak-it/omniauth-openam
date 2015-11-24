@@ -1,7 +1,7 @@
 module OmniAuth
   module Strategies
-  class Openam
-    class Configuration
+    class Openam
+      class Configuration
         DEFAULT_CONTENT_TYPE = 'application/json'
         DEFAULT_COOKIE_NAME = 'iPlanetDirectoryPro'
 

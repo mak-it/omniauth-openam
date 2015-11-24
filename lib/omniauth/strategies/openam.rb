@@ -2,8 +2,8 @@ require 'omniauth'
 
 module OmniAuth
   module Strategies
-  class Openam
-    include OmniAuth::Strategy
+    class Openam
+      include OmniAuth::Strategy
       autoload :Configuration, 'omniauth/strategies/openam/configuration'
       
       def initialize(app, options = {}, &block)
@@ -65,6 +65,6 @@ module OmniAuth
       def session
         @env.nil? ? {} : super
       end
-  end
+    end
   end
 end
