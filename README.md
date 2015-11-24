@@ -25,7 +25,7 @@ end
 
 ## Auth Hash
 
-Here's an example Auth Hash available in request.env['omniauth.auth']:
+Here's an example Auth Hash available in `request.env['omniauth.auth']`:
 
 ```ruby
 {
@@ -48,7 +48,7 @@ Here's an example Auth Hash available in request.env['omniauth.auth']:
       dn: ["uid=bjensen,ou=people,dc=example,dc=com"],
       givenname: ["Barbara"],
       mail: ["bjensen@example.com"],
-      objectclass: ["organizationalPerson", "person", "posixAccount", "inetOrgPerson", "krbprincipalaux", "krbTicketPolicyAux", "top"],
+      objectclass: ["organizationalPerson", "person", "inetOrgPerson", "top"],
       sn: ["Jensen"],
       telephonenumber: ["+1 408 555 1862"],
       uid: ["bjensen"]
