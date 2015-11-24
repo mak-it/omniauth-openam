@@ -25,6 +25,5 @@ You will need to supply the correct server URL and redirect URL
 
 == Copyright
 
-Copyleft 2014 Rahul Ghose. See LICENSE.txt for
+Copyleft 2014 Rahul Ghose, 2015 MAK IT. See LICENSE.txt for
 further details.
-
