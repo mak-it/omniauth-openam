@@ -18,7 +18,7 @@ The omniauth-openam library is an OmniAuth provider that supports authentication
 This is generally done in Rails in the config/initializers/omniauth.rb with...
 
   Rails.application.config.middleware.use OmniAuth::Builder do
-    provider :openam, name: "openam", :openam_url =>"https://mycompanyname.com/openam", :redirect_url => "http://myrelyingparty.com/path"
+    provider :openam, openam_url: 'https://example.com/openam'
   end
 
 You will need to supply the correct server URL and redirect URL

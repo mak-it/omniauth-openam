@@ -5,7 +5,7 @@ module OmniAuth
         DEFAULT_CONTENT_TYPE = 'application/json'
         DEFAULT_COOKIE_NAME = 'iPlanetDirectoryPro'
 
-        attr_reader :redirect_url, :disable_ssl_verification, :auth_url, :content_type, :cookie_name
+        attr_reader :disable_ssl_verification, :auth_url, :content_type, :cookie_name
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
 
@@ -23,7 +23,6 @@ module OmniAuth
           @content_type = options[:content_type] || DEFAULT_CONTENT_TYPE
           @cookie_name = options[:cookie_name] || DEFAULT_COOKIE_NAME
           @disable_ssl_verification = options[:disable_ssl]
-          @redirect_url = options[:redirect_url]
         end
       end
     end

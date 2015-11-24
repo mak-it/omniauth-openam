@@ -4,8 +4,9 @@ module OmniAuth
   module Strategies
     class Openam
       include OmniAuth::Strategy
+
       autoload :Configuration, 'omniauth/strategies/openam/configuration'
-      
+
       def initialize(app, options = {}, &block)
         options.symbolize_keys!()
         super(app, {:name=> :openam}.merge(options), &block)
@@ -13,8 +14,9 @@ module OmniAuth
       end
 
       protected
+
       def request_phase
-        redirect "#{@config.auth_url}?goto=#{@config.redirect_url}"
+        redirect "#{@config.auth_url}?goto=#{callback_url}"
       end
 
       def auth_hash
