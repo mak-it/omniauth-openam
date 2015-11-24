@@ -1,72 +1,92 @@
 require 'omniauth'
+require 'faraday'
 
 module OmniAuth
   module Strategies
-    class Openam
+    class OpenAM
       include OmniAuth::Strategy
 
-      autoload :Configuration, 'omniauth/strategies/openam/configuration'
+      option :cookie_name, 'iPlanetDirectoryPro'
 
-      def initialize(app, options = {}, &block)
-        options.symbolize_keys!()
-        super(app, {:name=> :openam}.merge(options), &block)
-        @config = OmniAuth::Strategies::Openam::Configuration.new(options)
+      args [:auth_url]
+
+      attr_reader :token
+
+      uid do
+        raw_info['uid'][0]
+      end
+
+      info do
+        {
+          username:   raw_info['uid'][0],
+          email:      raw_info['mail'][0],
+          first_name: raw_info['givenname'][0],
+          last_name:  raw_info['sn'][0],
+          name:       raw_info['cn'][0]
+        }
+      end
+
+      credentials do
+        {
+          token: token
+        }
+      end
+
+      extra do
+        {
+          raw_info: raw_info
+        }
       end
 
       protected
 
       def request_phase
-        redirect "#{@config.auth_url}?goto=#{callback_url}"
+        redirect "#{options[:auth_url]}?goto=#{callback_url}"
       end
 
-      def auth_hash
-        OmniAuth::Utils.deep_merge(super, {
-          'uid' => @userinfo['cn'][0],
-          'info' => user_info_hash
-        })
-      end
-
-      def user_info_hash
-        user = Hash.new
-        user['username'] = @userinfo['cn'][0]
-        user['email'] = @userinfo['mail'][0]
-        user['firstName'] = @userinfo['givenName'][0]
-        user['lastName'] = @userinfo['sn'][0]
-        user['name'] = "#{user['firstName']} #{user['lastName']}"
-        user
-      end
-  
-      def callback_phase 
-        token  = request.cookies[@config.cookie_name]
-        conn = Faraday.new(:url => @config.auth_url, :ssl => {:verify => !@config.disable_ssl_verification}) do |faraday|
-          faraday.request  :url_encoded       # form-encode POST params
-          faraday.response :logger          # log requests to STDOUT
-          faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+      def callback_phase
+        @token = request.cookies[options[:cookie_name]]
+        if token.nil?
+          e = RuntimeError.new("#{options[:cookie_name]} cookie is missing")
+          return fail!(:invalid_credentials, e)
         end
-        data = conn.post "#{URI(@config.auth_url).path}/identity/attributes", { :subjectid => token }
-        @userinfo = parse_user_attribute_response(data)
-        
-        return fail!(:invalid_credentials) if @userinfo.nil? || @userinfo.empty?
+        if raw_info.empty?
+          e = RuntimeError.new("Identity attributes are empty")
+          return fail!(:invalid_credentials, e)
+        end
         super
       end
 
-      def parse_user_attribute_response(response)
-        opensso_user = Hash.new{ |h,k| h[k] = Array.new }
-        attribute_name = ''
-        lines = response.body.split(/\n/)
-        lines.each do |line|
-          if line.match(/^userdetails.attribute.name=/)
-            attribute_name = line.gsub(/^userdetails.attribute.name=/, '').strip
-          elsif line.match(/^userdetails.attribute.value=/)
-            opensso_user[attribute_name] << line.gsub(/^userdetails.attribute.value=/, '').strip
+      def raw_info
+        @raw_info ||= begin
+          conn = Faraday.new(url: options[:auth_url]) do |faraday|
+            faraday.request  :url_encoded
+            faraday.response :logger, OmniAuth.logger
+            faraday.adapter Faraday.default_adapter
           end
+          response = conn.post(
+            "#{URI(options[:auth_url]).path}/identity/attributes",
+            subjectid: token
+          )
+          attributes = Hash.new{ |h,k| h[k] = [] }
+          name = nil
+          lines = response.body.split("\n")
+          lines.each do |line|
+            key, value = line.split("=", 2)
+            case key
+            when 'userdetails.token.id'
+              attributes['token'] = value
+            when 'userdetails.attribute.name'
+              name = value
+            when 'userdetails.attribute.value'
+              attributes[name] << value
+            end
+          end
+          attributes
         end
-        opensso_user
-      end
-
-      def session
-        @env.nil? ? {} : super
       end
     end
   end
 end
+
+OmniAuth.config.add_camelization 'openam', 'OpenAM'
