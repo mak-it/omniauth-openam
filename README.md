@@ -1,6 +1,6 @@
 # OmniAuth OpenAM
 
-[![Continuous Integration status](https://secure.travis-ci.org/mak-it/omniauth-openam.png)](http://travis-ci.org/mak-it/omniauth-openam)
+[![Continuous Integration status](https://secure.travis-ci.org/mak-it/omniauth-openam.svg)](http://travis-ci.org/mak-it/omniauth-openam)
 
 OmniAuth strategy for authenticating to [OpenAM](https://www.forgerock.com/products/access-management/).
 
