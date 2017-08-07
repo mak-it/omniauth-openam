@@ -6,9 +6,10 @@ module OmniAuth
     class OpenAM
       include OmniAuth::Strategy
 
-      option :cookie_name, 'iPlanetDirectoryPro'
-
       args [:auth_url]
+
+      option :cookie_name, 'iPlanetDirectoryPro'
+      option :login_url, nil
 
       attr_reader :token
 
@@ -41,7 +42,8 @@ module OmniAuth
       protected
 
       def request_phase
-        redirect "#{options[:auth_url]}?goto=#{callback_url}"
+        login_url = options[:login_url] || options[:auth_url]
+        redirect "#{login_url}?goto=#{callback_url}"
       end
 
       def callback_phase

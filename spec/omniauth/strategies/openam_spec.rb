@@ -7,8 +7,12 @@ RSpec.describe OmniAuth::Strategies::OpenAM, type: :strategy do
     "AQIC5wM2LY4SfcxuxIP0VnP2lVjs7ypEM6VDx6srk56CN1Q.*AAJTSQACMDE.*"
   end
 
-  def strategy
-    [OmniAuth::Strategies::OpenAM, "https://example.com/opensso"]
+  let :strategy do
+    [OmniAuth::Strategies::OpenAM, "https://example.com/opensso", options]
+  end
+
+  let :options do
+    {}
   end
 
   describe '/auth/openam' do
@@ -20,6 +24,22 @@ RSpec.describe OmniAuth::Strategies::OpenAM, type: :strategy do
           'https://example.com/opensso'\
           '?goto=http://example.org/auth/openam/callback'
         )
+    end
+
+    context 'with login_url' do
+      let :options do
+        { login_url: 'https://example.com/CustomLogin' }
+      end
+
+      it 'redirects to OpenAM login page' do
+        get '/auth/openam'
+        expect(last_response).to be_redirect
+        expect(last_response.headers['Location']).to \
+          eq(
+            'https://example.com/CustomLogin'\
+            '?goto=http://example.org/auth/openam/callback'
+          )
+      end
     end
   end
 
